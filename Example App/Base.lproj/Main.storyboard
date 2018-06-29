@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14269.14" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14252.5"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Tab Bar Controller-->
+        <scene sceneID="yl2-sM-qoP">
+            <objects>
+                <tabBarController id="49e-Tb-3d3" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" id="W28-zg-YXA">
+                        <rect key="frame" x="0.0" y="975" width="768" height="49"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="Ct7-XO-aaK" kind="relationship" relationship="viewControllers" id="4Fu-s4-R6h"/>
+                        <segue destination="jhB-YK-dls" kind="relationship" relationship="viewControllers" id="Ggm-Wz-oOT"/>
+                        <segue destination="HoN-wh-MPs" kind="relationship" relationship="viewControllers" id="zfq-G5-y1B"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1057" y="65"/>
+        </scene>
+        <!--Table View-->
+        <scene sceneID="Yww-0h-7hm">
+            <objects>
+                <tableViewController id="Ct7-XO-aaK" customClass="TableViewController" customModule="ExampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="UJ2-qI-IhR">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <connections>
+                            <outlet property="dataSource" destination="Ct7-XO-aaK" id="kIR-ip-Rv7"/>
+                            <outlet property="delegate" destination="Ct7-XO-aaK" id="dcM-PE-aPR"/>
+                        </connections>
+                    </tableView>
+                    <tabBarItem key="tabBarItem" title="Table View" id="CMD-ta-7Qo"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="SCO-MC-GO2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-292" y="-716"/>
+        </scene>
+        <!--Collection View-->
+        <scene sceneID="ddC-68-ZYN">
+            <objects>
+                <collectionViewController id="jhB-YK-dls" customClass="CollectionViewController" customModule="ExampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="af8-ie-AqA">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="axS-kT-Uv6">
+                            <size key="itemSize" width="50" height="50"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="jhB-YK-dls" id="9ms-cz-Bt2"/>
+                            <outlet property="delegate" destination="jhB-YK-dls" id="8nC-lE-vFm"/>
+                        </connections>
+                    </collectionView>
+                    <tabBarItem key="tabBarItem" title="Collection View" id="dV4-hx-YEf"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="PCD-CP-Csa" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-292" y="-56"/>
+        </scene>
+        <!--Stack View-->
+        <scene sceneID="iJ8-Jx-CKo">
+            <objects>
+                <viewController id="HoN-wh-MPs" customClass="StackViewController" customModule="ExampleApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="J3n-nh-CLz">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" placeholderIntrinsicWidth="375" placeholderIntrinsicHeight="200" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="UaV-4G-7WA">
+                                <rect key="frame" x="0.0" y="20" width="375" height="200"/>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="ABV-UC-R8I" firstAttribute="trailing" secondItem="UaV-4G-7WA" secondAttribute="trailing" id="Ww3-PN-mfI"/>
+                            <constraint firstItem="UaV-4G-7WA" firstAttribute="leading" secondItem="ABV-UC-R8I" secondAttribute="leading" id="aKd-GO-meY"/>
+                            <constraint firstItem="UaV-4G-7WA" firstAttribute="top" secondItem="ABV-UC-R8I" secondAttribute="top" id="qsy-To-3xc"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="ABV-UC-R8I"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Stack View" id="OXe-p7-q7M"/>
+                    <connections>
+                        <outlet property="stackView" destination="UaV-4G-7WA" id="jAy-ij-dJs"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4QR-9d-jE4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-292" y="623"/>
+        </scene>
+    </scenes>
+</document>
