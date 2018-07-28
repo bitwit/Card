@@ -9,7 +9,11 @@ class StackViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let arrayDataSourceManager = ArrayDataSourceManager(items: ["test", "tester", "testerino"])
+        let arrayDataSourceManager = ArrayDataSourceManager(items: [
+            "test",
+            "tester",
+            String(repeating: "test ", count: 30)
+            ])
         
         let mgr = CardStackViewManager<ExampleCard>(stackView: self.stackView)
         mgr.cardDescriptor = CardDescriptor()

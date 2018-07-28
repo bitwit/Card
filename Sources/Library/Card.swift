@@ -7,53 +7,20 @@ public protocol Cardable: class {
     
     associatedtype Model: Resource
     
-    var model: Model { get set }
+    var model: Model? { get set }
     
     static func create () -> Self
     static func defaultSize () -> CGSize
 }
 
-public struct CardDescriptor<C: Card> {
+extension Cardable {
     
-    public var cardType: C.Type {
-        return C.self
+    public static func loadedFromNib<T: AnyObject>() -> T {
+        let bundle = Bundle.init(for: T.self)
+        let view = bundle.loadNibNamed(String(describing: T.self), owner: self, options: nil)![0]
+        guard let castView = view as? T else {
+            fatalError("Nib exists by the correct name but first view was not a \(String(describing: T.self))")
+        }
+        return castView
     }
-    public let postConfig: (IndexPath, C) -> Void
-    public let onSelect: (IndexPath, C) -> Void
-    public let sizeConfig: (IndexPath) -> CGSize?
-    public let expandedSizeConfig: (IndexPath) -> CGFloat?
-    
-    // best way to do this? what about preferred content size?
-    public func preferredSizeForView() -> CGSize {
-        return self.cardType.defaultSize()
-    }
-    
-    public init(
-        postConfig: ((IndexPath, C) -> Void)? = nil
-        , onSelect: ((IndexPath, C) -> Void)? = nil
-        , sizeConfig: ((IndexPath) -> CGSize?)? = nil
-        , expandedSizeConfig: ((IndexPath) -> CGFloat?)? = nil
-        ) {
-        
-        self.postConfig = {
-            indexPath, card in
-            postConfig?(indexPath, card)
-        }
-        
-        self.sizeConfig = {
-            indexPath in
-            return sizeConfig?(indexPath)
-        }
-        
-        self.expandedSizeConfig = {
-            indexPath in
-            return expandedSizeConfig?(indexPath)
-        }
-        
-        self.onSelect = {
-            indexPath, card in
-            onSelect?(indexPath, card)
-        }
-    }
-    
 }

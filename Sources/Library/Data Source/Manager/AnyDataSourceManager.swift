@@ -18,7 +18,7 @@ public class AnyDataSourceManager<R: Resource>: DataSourceManager {
     fileprivate var _getDelegate: () -> DataSourceManagerDelegate?
     fileprivate var _setDelegate: (DataSourceManagerDelegate?) -> Void
     
-    init<D: DataSourceManager>(_ dataSourceManager: D) where D.Content == R {
+    public init<D: DataSourceManager>(_ dataSourceManager: D) where D.Content == R {
         _getSections = {
             return dataSourceManager.sections
         }

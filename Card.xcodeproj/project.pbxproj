@@ -21,6 +21,7 @@
 		7538BDA420E6B3E300D3474A /* ExampleCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7538BD9120E6B28A00D3474A /* ExampleCard.swift */; };
 		7538BDA620E6B50700D3474A /* ExampleCard.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7538BDA520E6B50700D3474A /* ExampleCard.xib */; };
 		7538BDA820E6BCFE00D3474A /* StackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7538BDA720E6BCFE00D3474A /* StackViewController.swift */; };
+		758BCE1720E82A3E00CED8A4 /* CardContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 758BCE1620E82A3E00CED8A4 /* CardContainer.swift */; };
 		75A323E820E683DA007F5E6D /* AnyDataSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A323E720E683DA007F5E6D /* AnyDataSourceManager.swift */; };
 		75EF869A20E69B7100F87D1B /* CardTableViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75EF869920E69B7100F87D1B /* CardTableViewManager.swift */; };
 		75FCB1E120E5C1CA0079C9EA /* Card.h in Headers */ = {isa = PBXBuildFile; fileRef = 75FCB1DF20E5C1CA0079C9EA /* Card.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -98,6 +99,7 @@
 		7538BD9B20E6B3C500D3474A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7538BDA520E6B50700D3474A /* ExampleCard.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ExampleCard.xib; sourceTree = "<group>"; };
 		7538BDA720E6BCFE00D3474A /* StackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackViewController.swift; sourceTree = "<group>"; };
+		758BCE1620E82A3E00CED8A4 /* CardContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContainer.swift; sourceTree = "<group>"; };
 		75A323E720E683DA007F5E6D /* AnyDataSourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDataSourceManager.swift; sourceTree = "<group>"; };
 		75EF869920E69B7100F87D1B /* CardTableViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardTableViewManager.swift; sourceTree = "<group>"; };
 		75FCB1DD20E5C1CA0079C9EA /* Card.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Card.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -220,6 +222,7 @@
 				751E7F3920DD9A30000281D5 /* CardStackViewManager.swift */,
 				751E7F3B20DD9A40000281D5 /* CardCollectionViewManager.swift */,
 				75EF869920E69B7100F87D1B /* CardTableViewManager.swift */,
+				758BCE1620E82A3E00CED8A4 /* CardContainer.swift */,
 			);
 			path = "UIKit Managers";
 			sourceTree = "<group>";
@@ -464,6 +467,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				75FCB1E920E5C1F80079C9EA /* Card.swift in Sources */,
+				758BCE1720E82A3E00CED8A4 /* CardContainer.swift in Sources */,
 				75EF869A20E69B7100F87D1B /* CardTableViewManager.swift in Sources */,
 				75FCB1EC20E5C1F80079C9EA /* Resource.swift in Sources */,
 				75FCB1EE20E5C1F80079C9EA /* ArrayDataSourceManager.swift in Sources */,

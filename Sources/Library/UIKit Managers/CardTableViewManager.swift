@@ -11,10 +11,15 @@ public class CardTableViewManager<C: Card>: NSObject, UITableViewDataSource, UIT
     public var cardDescriptor: CardDescriptor<C>!
     public var dataSourceManager: AnyDataSourceManager<C.Model>! {
         didSet {
-            reloadData()
+            dataSourceManagerDidReset()
             dataSourceManager?.delegate = self
         }
     }
+    
+    public var onDelete: ((IndexPath) -> Void)?
+    
+    private var sizeSnapshot: [Int]?
+    private var queuedItemChanges: [() -> Void] = []
     
     public init(tableView: UITableView = UITableView.init(frame: .zero) ) {
         super.init()
@@ -30,59 +35,145 @@ public class CardTableViewManager<C: Card>: NSObject, UITableViewDataSource, UIT
     
     fileprivate func reloadData() {
         tableView.reloadData()
-        print("reloading tableView >", dataSourceManager.sections.first!)
     }
     
-    // MARK: - UICollectionViewDataSource
+    // MARK: - UITableViewDataSource
     public func numberOfSections(in tableView: UITableView) -> Int {
         guard dataSourceManager != nil else {
             return 0
         }
         
-        return dataSourceManager.sections.count
+        let numSections = dataSourceManager.sections.count
+        return numSections
     }
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSourceManager.sections[section].count
+        let numRows = dataSourceManager.sections[section].count
+        return numRows
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let view = cardDescriptor.cardType.create()
-        let item = dataSourceManager.sections[indexPath.section][indexPath.item]
-        view.model = item
-        cardDescriptor.postConfig(indexPath, view)
-        cell.addSubview(view)
-        view.constrainToSuperview()
+        let item = dataSourceManager.sections[indexPath.section][indexPath.row]
+        let cardView = cell.configure(withCardType: C.self, model: item)
+        cardDescriptor.postConfig?(indexPath, cardView)
         return cell
     }
     
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return cardDescriptor.preferredSizeForView()
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let onSelect = cardDescriptor.onSelect
+            , let card = tableView.cellForRow(at: indexPath)?.cardView as? C else { return }
+        onSelect(indexPath, card)
+    }
+    
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return cardDescriptor.sizeConfig?(indexPath)?.height ?? C.defaultSize().height
+    }
+    
+    public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+     }
+    
+    public func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
+        return .delete
+    }
+ 
+    public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            onDelete!(indexPath)
+        }
     }
     
 }
 
 extension CardTableViewManager: DataSourceManagerDelegate {
     
+  
     public func dataSourceManagerItemsWillChange() {
-        
+        queuedItemChanges.removeAll()
+        sizeSnapshot = (0..<tableView.numberOfSections).map { tableView.numberOfRows(inSection: $0) }
     }
     
     public func dataSourceManagerSection(at sectionIndex: Int, did changeType: DataSourceManagerChangeType) {
-        reloadData()
+        
+        switch changeType {
+        case .add:
+            insertSection(at: sectionIndex)
+        case .remove:
+            deleteSection(at: sectionIndex)
+        default:
+            break
+        }
     }
     
     public func dataSourceManagerItem(at indexPath: IndexPath, did changeType: DataSourceManagerChangeType) {
-        reloadData()
-    }
-    
-    public func dataSourceManagerItemsDidChange() {
-        reloadData()
+        
+        switch changeType {
+        case .add:
+            insert(at: indexPath)
+        case .remove:
+            delete(at: indexPath)
+        default:
+            break
+        }
     }
     
     public func dataSourceManagerDidReset() {
+        
+        //TODO: improve
         reloadData()
+    }
+    
+    open func dataSourceManagerItemsDidChange() {
+        let changes = queuedItemChanges
+        
+        guard false == changes.isEmpty else {
+            sizeSnapshot = nil
+            return
+        }
+        
+        tableView?.performBatchUpdates({
+            changes.forEach { $0() }
+        }, completion: {
+            [weak self] _ in
+            self?.sizeSnapshot = nil
+        })
+        queuedItemChanges.removeAll()
+    }
+    
+    fileprivate func insertSection(at index: Int) {
+        queuedItemChanges.append {
+            [weak self] in
+            
+            self?.tableView?.insertSections(IndexSet(integer: index), with: .automatic)
+            self?.sizeSnapshot?.insert(0, at: index)
+        }
+    }
+    
+    fileprivate func deleteSection(at index: Int) {
+        queuedItemChanges.append {
+            [weak self] in
+            
+            self?.tableView?.deleteSections(IndexSet(integer: index), with: .automatic)
+            self?.sizeSnapshot?.remove(at: index)
+        }
+    }
+    
+    fileprivate func insert(at indexPath: IndexPath) {
+        queuedItemChanges.append {
+            [weak self] in
+            
+            self?.tableView?.insertRows(at: [indexPath], with: .automatic)
+            self?.sizeSnapshot?[indexPath.section] += 1
+        }
+    }
+    
+    fileprivate func delete(at indexPath: IndexPath) {
+        queuedItemChanges.append {
+            [weak self] in
+            self?.tableView?.deleteRows(at: [indexPath], with: .automatic)
+            self?.sizeSnapshot?[indexPath.section] -= 1
+        }
     }
     
 }

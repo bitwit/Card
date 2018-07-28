@@ -12,10 +12,13 @@ public class CardCollectionViewManager<C: Card>: NSObject, UICollectionViewDataS
     public var cardDescriptor: CardDescriptor<C>!
     public var dataSourceManager: AnyDataSourceManager<C.Model>! {
         didSet {
-            reloadData()
+            dataSourceManagerDidReset()
             dataSourceManager?.delegate = self
         }
     }
+    
+    private var sizeSnapshot: [Int]?
+    private var queuedItemChanges: [() -> Void] = []
     
     public init(collectionView: UICollectionView = UICollectionView.init(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()) ) {
         super.init()
@@ -47,20 +50,24 @@ public class CardCollectionViewManager<C: Card>: NSObject, UICollectionViewDataS
         return dataSourceManager.sections[section].count
     }
     
-    //TODO: improve card reuse logic
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath)
-        let view = cardDescriptor.cardType.create()
+        
         let item = dataSourceManager.sections[indexPath.section][indexPath.item]
-        view.model = item
-        cardDescriptor.postConfig(indexPath, view)
-        cell.addSubview(view)
-        view.constrainToSuperview()
+        let cardView = cell.configure(withCardType: C.self, model: item)
+        cardDescriptor.postConfig?(indexPath, cardView)
+        
         return cell
     }
-    
+
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return cardDescriptor.preferredSizeForView()
+        return cardDescriptor.sizeConfig?(indexPath) ?? C.defaultSize()
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let onSelect = cardDescriptor.onSelect
+            , let card = collectionView.cellForItem(at: indexPath)?.cardView as? C else { return }
+        onSelect(indexPath, card)
     }
     
 }
@@ -68,23 +75,89 @@ public class CardCollectionViewManager<C: Card>: NSObject, UICollectionViewDataS
 extension CardCollectionViewManager: DataSourceManagerDelegate {
     
     public func dataSourceManagerItemsWillChange() {
-        
+        queuedItemChanges.removeAll()
+        sizeSnapshot = (0..<collectionView.numberOfSections).map { collectionView.numberOfItems(inSection: $0) }
     }
     
     public func dataSourceManagerSection(at sectionIndex: Int, did changeType: DataSourceManagerChangeType) {
-        reloadData()
+        
+        switch changeType {
+        case .add:
+            insertSection(at: sectionIndex)
+        case .remove:
+            deleteSection(at: sectionIndex)
+        default:
+            break
+        }
     }
     
     public func dataSourceManagerItem(at indexPath: IndexPath, did changeType: DataSourceManagerChangeType) {
-        reloadData()
-    }
-    
-    public func dataSourceManagerItemsDidChange() {
-        reloadData()
+        
+        switch changeType {
+        case .add:
+            insert(at: indexPath)
+        case .remove:
+            delete(at: indexPath)
+        default:
+            break
+        }
     }
     
     public func dataSourceManagerDidReset() {
+        
+        //TODO: improve
         reloadData()
     }
     
+    open func dataSourceManagerItemsDidChange() {
+        let changes = queuedItemChanges
+        
+        guard false == changes.isEmpty else {
+            sizeSnapshot = nil
+            return
+        }
+        
+        collectionView?.performBatchUpdates({
+            changes.forEach { $0() }
+        }, completion: {
+            [weak self] _ in
+            self?.sizeSnapshot = nil
+        })
+        queuedItemChanges.removeAll()
+    }
+    
+    fileprivate func insertSection(at index: Int) {
+        queuedItemChanges.append {
+            [weak self] in
+            
+            self?.collectionView?.insertSections(IndexSet(integer: index))
+            self?.sizeSnapshot?.insert(0, at: index)
+        }
+    }
+    
+    fileprivate func deleteSection(at index: Int) {
+        queuedItemChanges.append {
+            [weak self] in
+            
+            self?.collectionView?.deleteSections(IndexSet(integer: index))
+            self?.sizeSnapshot?.remove(at: index)
+        }
+    }
+    
+    fileprivate func insert(at indexPath: IndexPath) {
+        queuedItemChanges.append {
+            [weak self] in
+            
+            self?.collectionView?.insertItems(at: [indexPath])
+            self?.sizeSnapshot?[indexPath.section] += 1
+        }
+    }
+    
+    fileprivate func delete(at indexPath: IndexPath) {
+        queuedItemChanges.append {
+            [weak self] in
+            self?.collectionView?.deleteItems(at: [indexPath])
+            self?.sizeSnapshot?[indexPath.section] -= 1
+        }
+    }
 }

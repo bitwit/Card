@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-public class CardStackViewManager<C: Card> {
+public class CardStackViewManager<C: Card>: NSObject {
     
     public var stackView: UIStackView!
     public var cardDescriptor: CardDescriptor<C>!
@@ -22,13 +22,44 @@ public class CardStackViewManager<C: Card> {
     
     fileprivate func reloadData() {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        dataSourceManager.sections.first?.enumerated().forEach { idx, item in
-            let view = cardDescriptor.cardType.create()
+
+        let cards = dataSourceManager.sections.first?.enumerated().map { idx, item -> C in
+            let view = C.create()
             view.model = item
+            view.constrain(size: C.defaultSize())
+            view.tag = idx
             stackView.addArrangedSubview(view)
-            cardDescriptor.postConfig(IndexPath(row: idx, section: 0), view)
+            return view
         }
+        DispatchQueue.main.async {
+            cards?.enumerated().forEach({ idx, card in
+                if self.cardDescriptor.onSelect != nil {
+                    let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.cardTapped(sender:)))
+                    card.addGestureRecognizer(tapRecognizer)
+                    card.isUserInteractionEnabled = true
+                }
+                self.cardDescriptor.postConfig?(IndexPath(row: idx, section: 0), card)
+            })
+        }
+        
+    }
+    
+    public func forEach(action: (IndexPath, C) -> Void) {
+        stackView.arrangedSubviews.enumerated().forEach({ idx, card in
+            action(IndexPath(row: idx, section: 0), card as! C)
+        })
+    }
+    
+    public func cardForItem(at indexPath: IndexPath) -> C {
+        return stackView.arrangedSubviews[indexPath.item] as! C
+    }
+    
+    @objc func cardTapped(sender: UITapGestureRecognizer) {
+        guard let idx = sender.view?.tag
+            , let card = stackView.arrangedSubviews[idx] as? C
+            else { return }
+        
+        cardDescriptor.onSelect?(IndexPath(row: idx, section: 0), card)
     }
 }
 
