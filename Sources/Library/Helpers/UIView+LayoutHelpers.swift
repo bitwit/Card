@@ -3,19 +3,23 @@ import UIKit
 
 extension UIView {
     
-    public func constrainToSuperview() {
-        constrain(to: [.top, .trailing, .bottom, .leading])
+    @discardableResult
+    public func constrainToSuperview(constant: CGFloat = 0) -> [NSLayoutConstraint] {
+        return constrain(to: [.top, .leading, .trailing, .bottom], constant: constant)
     }
     
-    public func constrain(to superviewEdges: [NSLayoutAttribute]) {
+    @discardableResult
+    public func constrain(to superviewEdges: [NSLayoutConstraint.Attribute], constant: CGFloat = 0) -> [NSLayoutConstraint]  {
         guard let superview = self.superview else { fatalError("view not inside of a superview") }
                 
         translatesAutoresizingMaskIntoConstraints = false
        
-        let constraints = superviewEdges.map {
-            NSLayoutConstraint(item: self, attribute: $0, relatedBy: .equal, toItem: superview, attribute: $0, multiplier: 1, constant: 0)
+        let constraints = superviewEdges.map { edge -> NSLayoutConstraint in
+            let finalConstant = (edge == .trailing || edge == .bottom) ? -constant : constant
+            return NSLayoutConstraint(item: self, attribute: edge, relatedBy: .equal, toItem: superview, attribute: edge, multiplier: 1, constant: finalConstant)
         }
         NSLayoutConstraint.activate(constraints)
+        return constraints
     }
     
     public func constrainToSuperviewSafeAreaEdges() {
@@ -36,15 +40,19 @@ extension UIView {
         constrain(height: size.height)
     }
     
-    public func constrain(width: CGFloat) {
-        let widthConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal
-            , toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: width)
+    @discardableResult
+    public func constrain(width: CGFloat) -> NSLayoutConstraint {
+        let widthConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal
+            , toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width)
         NSLayoutConstraint.activate([widthConstraint])
+        return widthConstraint
     }
     
-    public func constrain(height: CGFloat) {
-        let heightConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal
-            , toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: height)
+    @discardableResult
+    public func constrain(height: CGFloat) -> NSLayoutConstraint {
+        let heightConstraint = NSLayoutConstraint(item: self, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal
+            , toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: height)
         NSLayoutConstraint.activate([heightConstraint])
+        return heightConstraint
     }
 }

@@ -24,3 +24,25 @@ extension Cardable {
         return castView
     }
 }
+
+extension Cardable where Self: UIView {
+    
+    public func createImageSnapshot(size: CGSize = Self.defaultSize()) -> UIImage? {
+        
+        let rect: CGRect = .init(origin: .zero, size: size)
+        
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, 0.0)
+        defer {
+            UIGraphicsEndImageContext()
+        }
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        
+        layer.render(in: context)
+        
+        guard let newImage = UIGraphicsGetImageFromCurrentImageContext()?.withRenderingMode(.alwaysOriginal) else {
+            return nil
+        }
+        
+        return newImage
+    }
+}

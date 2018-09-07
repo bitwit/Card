@@ -9,6 +9,9 @@ public class CardTableViewManager<C: Card>: NSObject, UITableViewDataSource, UIT
         }
     }
     public var cardDescriptor: CardDescriptor<C>!
+    
+    public var sectionHeaderDescriptor: SectionHeaderDescriptor?
+    
     public var dataSourceManager: AnyDataSourceManager<C.Model>! {
         didSet {
             dataSourceManagerDidReset()
@@ -16,7 +19,7 @@ public class CardTableViewManager<C: Card>: NSObject, UITableViewDataSource, UIT
         }
     }
     
-    public var onDelete: ((IndexPath) -> Void)?
+    public var trailingActionsForRow: ((IndexPath, C) -> UISwipeActionsConfiguration?)?
     
     private var sizeSnapshot: [Int]?
     private var queuedItemChanges: [() -> Void] = []
@@ -54,6 +57,7 @@ public class CardTableViewManager<C: Card>: NSObject, UITableViewDataSource, UIT
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        cell.selectionStyle = .none
         let item = dataSourceManager.sections[indexPath.section][indexPath.row]
         let cardView = cell.configure(withCardType: C.self, model: item)
         cardDescriptor.postConfig?(indexPath, cardView)
@@ -70,18 +74,23 @@ public class CardTableViewManager<C: Card>: NSObject, UITableViewDataSource, UIT
         return cardDescriptor.sizeConfig?(indexPath)?.height ?? C.defaultSize().height
     }
     
+    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return (sectionHeaderDescriptor?.sizeConfig(section) ?? .zero).height
+    }
+    
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let view = sectionHeaderDescriptor!.viewBuilder()
+        sectionHeaderDescriptor?.viewConfigurer(section, view)
+        return view
+    }
+    
     public func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
      }
     
-    public func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
-        return .delete
-    }
- 
-    public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            onDelete!(indexPath)
-        }
+    public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard let card = tableView.cellForRow(at: indexPath)?.cardView as? C else { return nil }
+        return self.trailingActionsForRow?(indexPath, card)
     }
     
 }

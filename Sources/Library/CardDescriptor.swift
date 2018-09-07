@@ -26,3 +26,46 @@ public struct CardDescriptor<C: Card> {
     }
     
 }
+
+public struct SectionHeaderDescriptor {
+    public var viewType: UIView.Type
+    
+    var postConfig: ((Int, UIView) -> Void)?
+
+    public let viewBuilder: () -> UIView
+    public let viewConfigurer: (Int, UIView) -> Void
+    public let sizeConfig: (Int) -> CGSize
+    
+    public init<V: Card> (
+        cardType: V.Type,
+        modelProvider: @escaping (Int) -> V.Model,
+        postConfig: ((Int, V) -> Void)? = nil,
+        sizeConfig: ((Int) -> CGSize)? = nil
+        ) {
+        
+        viewBuilder = {
+            let newCard: V = .loadedFromNib()
+            return newCard
+        }
+        
+        viewConfigurer = { index, view in
+            guard let existingCard = view as? V else {
+                fatalError("unexpected view type")
+            }
+            existingCard.model = modelProvider(index)
+            postConfig?(index, existingCard)
+        }
+        
+        self.sizeConfig = { index in
+            return sizeConfig?(index) ?? V.defaultSize()
+        }
+        
+        self.viewType = V.self
+        self.postConfig = { int, view in
+            guard let existingCard = view as? V else {
+                fatalError("unexpected view type")
+            }
+            postConfig?(int, existingCard)
+        }
+    }
+}

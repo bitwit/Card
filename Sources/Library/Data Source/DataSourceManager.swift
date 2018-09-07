@@ -11,7 +11,8 @@ public protocol DataSourceManager: class {
 public enum DataSourceManagerChangeType {
     case add
     case remove
-    case update
+    case update(Any)
+    case move(Any, IndexPath)
 }
 
 public protocol DataSourceManagerDelegate: class {
