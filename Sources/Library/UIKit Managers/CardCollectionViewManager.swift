@@ -46,12 +46,21 @@ public class CardCollectionViewManager<C: Card>: NSObject, UICollectionViewDataS
         collectionView.reloadData()
     }
     
-    public func refreshHeader(at indexPath: IndexPath) {
+    @discardableResult
+    public func refreshHeader(at indexPath: IndexPath) -> UIView? {
         guard let header = collectionView.supplementaryView(forElementKind: UICollectionView.elementKindSectionHeader, at: indexPath)
             , let existingCard = header.subviews.first else {
-                return
+                return nil
         }
         sectionHeaderDescriptor?.viewConfigurer(indexPath.section, existingCard)
+        return existingCard
+    }
+    
+    @discardableResult
+    public func visibleHeaders() -> [UIView] {
+        return collectionView
+            .visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
+            .compactMap { $0.subviews.first }
     }
     
     fileprivate func reloadData() {
@@ -128,6 +137,7 @@ public class CardCollectionViewManager<C: Card>: NSObject, UICollectionViewDataS
 extension CardCollectionViewManager: DataSourceManagerDelegate {
     
     public func dataSourceManagerItemsWillChange() {
+//        print("0- ITEMS WILL CHANGE")
         queuedItemChanges.removeAll()
         sizeSnapshot = (0..<collectionView.numberOfSections).map { collectionView.numberOfItems(inSection: $0) }
     }
@@ -159,14 +169,13 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
     }
     
     public func dataSourceManagerDidReset() {
-        
         //TODO: improve
         reloadData()
     }
     
     open func dataSourceManagerItemsDidChange() {
         let changes = queuedItemChanges
-        print("1- ITEMS DID CHANGE")
+//        print("1- ITEMS DID CHANGE, TOTAL:", changes.count)
         guard false == changes.isEmpty else {
             sizeSnapshot = nil
             return
@@ -178,13 +187,13 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
             collectionView.reloadData()
             return
         }
-        print("2- BATCH UPDATES START")
+//        print("2- BATCH UPDATES START")
         collectionView?.performBatchUpdates({
             changes.forEach { $0() }
         }, completion: {
             [weak self] _ in
             self?.sizeSnapshot = nil
-            print("3- BATCH UPDATES DONE")
+//            print("3- BATCH UPDATES DONE")
         })
         queuedItemChanges.removeAll()
     }
@@ -193,7 +202,7 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
         queuedItemChanges.append {
             [weak self] in
             
-            print("insert section \(index)")
+//            print("insert section \(index)")
             self?.collectionView?.insertSections(IndexSet(integer: index))
             if index > (self?.sizeSnapshot?.count ?? 0) {
                 self?.sizeSnapshot?.append(0)
@@ -206,7 +215,7 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
     fileprivate func deleteSection(at index: Int) {
         queuedItemChanges.append {
             [weak self] in
-            print("delete section \(index)")
+//            print("delete section \(index)")
             self?.collectionView?.deleteSections(IndexSet(integer: index))
             self?.sizeSnapshot?.remove(at: index)
         }
@@ -215,7 +224,7 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
     fileprivate func insert(at indexPath: IndexPath) {
         queuedItemChanges.append {
             [weak self] in
-            print("insert cell \(indexPath)")
+//            print("insert cell \(indexPath)")
             self?.collectionView?.insertItems(at: [indexPath])
             self?.sizeSnapshot?[indexPath.section] += 1
         }
@@ -227,7 +236,7 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
             let card = self?.collectionView?.cellForItem(at: indexPath)?.cardView as? C
             card?.model = object
             
-            print("move cell \(indexPath) to \(newIndexPath)")
+//            print("move cell \(indexPath) to \(newIndexPath)")
             
             if true == self?.performMovesAsDeletionAndInsertion {
                 self?.collectionView?.deleteItems(at: [indexPath])
@@ -243,14 +252,14 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
             [weak self] in
             let card = self?.collectionView?.cellForItem(at: indexPath)?.cardView as? C
             card?.model = object //dataSourceManager.sections[indexPath.section][indexPath.item]
-            print("update cell \(indexPath) with", (object as! NSObject).value(forKey: "title"))
+//            print("update cell \(indexPath) with", (object as! NSObject).value(forKey: "title"))
         }
     }
     
     fileprivate func delete(at indexPath: IndexPath) {
         queuedItemChanges.append {
             [weak self] in
-            print("delete cell \(indexPath)")
+//            print("delete cell \(indexPath)")
             self?.collectionView?.deleteItems(at: [indexPath])
             self?.sizeSnapshot?[indexPath.section] -= 1
         }
