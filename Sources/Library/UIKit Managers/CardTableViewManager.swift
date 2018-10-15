@@ -141,6 +141,13 @@ extension CardTableViewManager: DataSourceManagerDelegate {
             return
         }
         
+        // If not currently visible, no need to animate changes
+        guard tableView?.window != nil else {
+            sizeSnapshot = nil
+            tableView.reloadData()
+            return
+        }
+        
         tableView?.performBatchUpdates({
             changes.forEach { $0() }
         }, completion: {

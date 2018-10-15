@@ -137,7 +137,7 @@ public class CardCollectionViewManager<C: Card>: NSObject, UICollectionViewDataS
 extension CardCollectionViewManager: DataSourceManagerDelegate {
     
     public func dataSourceManagerItemsWillChange() {
-//        print("0- ITEMS WILL CHANGE")
+        print("0- ITEMS WILL CHANGE")
         queuedItemChanges.removeAll()
         sizeSnapshot = (0..<collectionView.numberOfSections).map { collectionView.numberOfItems(inSection: $0) }
     }
@@ -217,7 +217,11 @@ extension CardCollectionViewManager: DataSourceManagerDelegate {
             [weak self] in
 //            print("delete section \(index)")
             self?.collectionView?.deleteSections(IndexSet(integer: index))
-            self?.sizeSnapshot?.remove(at: index)
+            if index == (self?.sizeSnapshot?.count ?? 0) {
+                self?.sizeSnapshot?.removeLast()
+            } else {
+                self?.sizeSnapshot?.remove(at: index)
+            }
         }
     }
     

@@ -26,7 +26,7 @@ public class CardStackViewManager<C: Card>: NSObject {
         let cards = dataSourceManager.sections.first?.enumerated().map { idx, item -> C in
             let view = C.create()
             view.model = item
-            view.constrain(size: C.defaultSize())
+            view.constrain(size: cardDescriptor.sizeConfig?(IndexPath(item: idx, section: 0)) ?? C.defaultSize())
             view.tag = idx
             stackView.addArrangedSubview(view)
             return view
